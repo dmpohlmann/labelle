@@ -23,6 +23,7 @@ dependencies = [
     "PyQt6",
     "darkdetect",
     "typer>=0.16.0",
+    "typing_extensions>=3.7.4; python_version<'3.9'",
 ]
 classifiers = [
     "Operating System :: POSIX :: Linux",

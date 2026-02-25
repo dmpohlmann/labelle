@@ -13,7 +13,11 @@ from typing import List, NoReturn, Optional
 import typer
 from rich.console import Console
 from rich.table import Table
-from typing_extensions import Annotated
+
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
 
 from labelle import __version__
 from labelle.lib.constants import (
