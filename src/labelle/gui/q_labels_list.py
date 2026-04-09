@@ -10,6 +10,7 @@ from labelle.gui.common import crash_msg_box
 from labelle.gui.q_label_widgets import (
     BarcodeDymoLabelWidget,
     BaseLabelWidget,
+    DataMatrixDymoLabelWidget,
     EmptyRenderEngine,
     ImageDymoLabelWidget,
     QrDymoLabelWidget,
@@ -208,6 +209,7 @@ class QLabelList(QListWidget):
         contextMenu = QMenu(self)
         add_text: Optional[QAction] = contextMenu.addAction("Add Text")
         add_qr: Optional[QAction] = contextMenu.addAction("Add QR")
+        add_datamatrix: Optional[QAction] = contextMenu.addAction("Add DataMatrix")
         add_barcode: Optional[QAction] = contextMenu.addAction("Add Barcode")
         add_img: Optional[QAction] = contextMenu.addAction("Add Image")
         delete: Optional[QAction] = contextMenu.addAction("Delete")
@@ -228,6 +230,14 @@ class QLabelList(QListWidget):
             self.addItem(item)
             self.setItemWidget(item, qr_item_widget)
             qr_item_widget.itemRenderSignal.connect(self.render_label)
+
+        if menu_click == add_datamatrix:
+            item = QListWidgetItem(self)
+            dm_item_widget = DataMatrixDymoLabelWidget(self.render_context)
+            item.setSizeHint(dm_item_widget.sizeHint())
+            self.addItem(item)
+            self.setItemWidget(item, dm_item_widget)
+            dm_item_widget.itemRenderSignal.connect(self.render_label)
 
         if menu_click == add_barcode:
             item = QListWidgetItem(self)

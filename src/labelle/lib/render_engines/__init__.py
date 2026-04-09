@@ -1,5 +1,9 @@
 from labelle.lib.render_engines.barcode import BarcodeRenderEngine, BarcodeRenderError
 from labelle.lib.render_engines.barcode_with_text import BarcodeWithTextRenderEngine
+from labelle.lib.render_engines.datamatrix import (
+    DataMatrixRenderEngine,
+    DataMatrixTooBigError,
+)
 from labelle.lib.render_engines.empty import EmptyRenderEngine
 from labelle.lib.render_engines.exceptions import NoContentError
 from labelle.lib.render_engines.horizontally_combined import (
@@ -23,6 +27,8 @@ __all__ = [
     "BarcodeRenderEngine",
     "BarcodeRenderError",
     "BarcodeWithTextRenderEngine",
+    "DataMatrixRenderEngine",
+    "DataMatrixTooBigError",
     "EmptyRenderEngine",
     "HorizontallyCombinedRenderEngine",
     "MarginsRenderEngine",
