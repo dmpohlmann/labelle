@@ -4,6 +4,7 @@ from typing import Sequence
 
 from PIL import Image
 
+from labelle.lib.constants import Direction
 from labelle.lib.render_engines.empty import EmptyRenderEngine
 from labelle.lib.render_engines.render_context import RenderContext
 from labelle.lib.render_engines.render_engine import RenderEngine
@@ -15,10 +16,12 @@ class VerticallyCombinedRenderEngine(RenderEngine):
     def __init__(
         self,
         render_engines: Sequence[RenderEngine],
+        alignments: Sequence[Direction] | None = None,
         padding: int = 0,
     ):
         super().__init__()
         self.render_engines = render_engines
+        self.alignments = alignments
         self.padding = padding
 
     def render(self, context: RenderContext) -> Image.Image:
@@ -45,9 +48,18 @@ class VerticallyCombinedRenderEngine(RenderEngine):
         total_height = sum(b.height for b in bitmaps) + total_padding
         merged_bitmap = Image.new("1", (max_width, total_height))
 
+        default_alignments = [Direction.CENTER] * n
+        alignments = self.alignments or default_alignments
+
         y_offset = 0
-        for bitmap in bitmaps:
-            x_offset = (max_width - bitmap.width) // 2
+        for i, bitmap in enumerate(bitmaps):
+            align = alignments[i] if i < len(alignments) else Direction.CENTER
+            if align == Direction.LEFT:
+                x_offset = 0
+            elif align == Direction.RIGHT:
+                x_offset = max_width - bitmap.width
+            else:
+                x_offset = (max_width - bitmap.width) // 2
             merged_bitmap.paste(bitmap, box=(x_offset, y_offset))
             y_offset += bitmap.height + self.padding
 

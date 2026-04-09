@@ -309,21 +309,26 @@ class VerticalTextGroupWidget(BaseLabelWidget):
     @property
     def render_engine_impl(self):
         engines = []
+        alignments = []
         for row in self._rows:
             text = row.label.text()
             if not text:
                 text = " "
+            align = Direction(row.align.currentText())
             engines.append(
                 TextRenderEngine(
                     text_lines=[text],
                     font_file_name=row.font_style.currentData(),
                     font_size_ratio=row.font_size.value() / 100.0,
-                    align=Direction(row.align.currentText()),
+                    align=align,
                 )
             )
+            alignments.append(align)
         if not engines:
             return EmptyRenderEngine()
-        return VerticallyCombinedRenderEngine(render_engines=engines)
+        return VerticallyCombinedRenderEngine(
+            render_engines=engines, alignments=alignments
+        )
 
 
 class QrDymoLabelWidget(BaseLabelWidget):
