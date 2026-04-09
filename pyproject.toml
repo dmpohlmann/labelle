@@ -21,6 +21,7 @@ dependencies = [
     "ppf.datamatrix",
     "python-barcode>=0.13.1",
     "pyusb",
+    "svglib",
     "libusb; sys_platform=='win32'",
     "PyQt6",
     "darkdetect",
