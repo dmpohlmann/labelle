@@ -97,8 +97,28 @@ def _path_from_name(name: str) -> Path:
     return matching_fonts[0]
 
 
+def _get_adobe_activated_fonts() -> List[Path]:
+    """Get Adobe Creative Cloud activated fonts."""
+    import os
+
+    adobe_base = Path(
+        os.path.expandvars(r"%APPDATA%\Adobe\CoreSync\plugins\livetype")
+    )
+    if not adobe_base.is_dir():
+        return []
+    fonts = []
+    for subdir in ["r", "w"]:
+        folder = adobe_base / subdir
+        if folder.is_dir():
+            for f in folder.iterdir():
+                if f.is_file():
+                    fonts.append(f)
+    return fonts
+
+
 def get_available_fonts() -> List[Path]:
     """Get a list of available font files."""
     fonts = [f for f in _DEFAULT_FONTS_DIR.iterdir() if f.suffix == ".ttf"]
     fonts.extend(Path(f) for f in font_manager.findSystemFonts())
-    return sorted(fonts, key=lambda f: f.stem.lower())
+    fonts.extend(_get_adobe_activated_fonts())
+    return sorted(set(fonts), key=lambda f: f.stem.lower())
