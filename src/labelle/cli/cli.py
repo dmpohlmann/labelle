@@ -24,10 +24,12 @@ from labelle.lib.constants import (
     DEFAULT_BARCODE_TYPE,
     DEFAULT_MARGIN_PX,
     PIXELS_PER_MM,
+    USE_DATAMATRIX,
     USE_QR,
     BarcodeType,
     Direction,
     Output,
+    e_datamatrix,
     e_qrcode,
 )
 from labelle.lib.devices.device_manager import DeviceManager, DeviceManagerNoDevices
@@ -45,6 +47,7 @@ from labelle.lib.outputs import output_bitmap
 from labelle.lib.render_engines import (
     BarcodeRenderEngine,
     BarcodeWithTextRenderEngine,
+    DataMatrixRenderEngine,
     HorizontallyCombinedRenderEngine,
     PictureRenderEngine,
     PrintPayloadRenderEngine,
@@ -80,6 +83,14 @@ def qr_callback(qr_content: str) -> str:
             "QR code cannot be used without QR support installed"
         ) from e_qrcode
     return qr_content
+
+
+def datamatrix_callback(dm_content: str) -> str:
+    if dm_content and not USE_DATAMATRIX:
+        raise typer.BadParameter(
+            "DataMatrix code cannot be used without ppf.datamatrix installed"
+        ) from e_datamatrix
+    return dm_content
 
 
 def get_device_manager() -> DeviceManager:
@@ -203,6 +214,15 @@ def default(
         Optional[str],
         typer.Option(
             "--qr", callback=qr_callback, help="QR code", rich_help_panel="Elements"
+        ),
+    ] = None,
+    datamatrix_content: Annotated[
+        Optional[str],
+        typer.Option(
+            "--datamatrix",
+            callback=datamatrix_callback,
+            help="DataMatrix code",
+            rich_help_panel="Elements",
         ),
     ] = None,
     batch: Annotated[
@@ -476,6 +496,9 @@ def default(
     if qr_content:
         render_engines.append(QrRenderEngine(qr_content))
 
+    if datamatrix_content:
+        render_engines.append(DataMatrixRenderEngine(datamatrix_content))
+
     if barcode_with_text_content:
         render_engines.append(
             BarcodeWithTextRenderEngine(
@@ -523,6 +546,12 @@ def default(
                 render_engines.append(
                     QrRenderEngine(qr_callback("\n".join(accumulator)))
                 )
+            elif accumulator_type == "datamatrix":
+                render_engines.append(
+                    DataMatrixRenderEngine(
+                        datamatrix_callback("\n".join(accumulator))
+                    )
+                )
             elif accumulator_type == "barcode":
                 barcode_type = (
                     BarcodeType(accumulator_options[0].lower())
@@ -559,6 +588,10 @@ def default(
             elif setting == "QR":
                 flush_all()
                 accumulator_type = "qr"
+                accumulator.append(value)
+            elif setting == "DATAMATRIX":
+                flush_all()
+                accumulator_type = "datamatrix"
                 accumulator.append(value)
             elif setting == "BARCODE":
                 flush_all()

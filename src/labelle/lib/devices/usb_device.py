@@ -6,6 +6,7 @@ from textwrap import dedent
 from typing import Any, NoReturn
 
 import usb
+import usb.backend.libusb1
 
 from labelle.lib.constants import (
     DEV_VENDOR,
@@ -15,6 +16,23 @@ from labelle.lib.constants import (
 )
 
 LOG = logging.getLogger(__name__)
+
+
+def _get_libusb_backend():
+    """Get a libusb backend, falling back to the bundled DLL from the libusb package."""
+    backend = usb.backend.libusb1.get_backend()
+    if backend is not None:
+        return backend
+    if platform.system() == "Windows":
+        try:
+            import libusb
+
+            backend = usb.backend.libusb1.get_backend(
+                find_library=lambda x: libusb.dll._name
+            )
+        except (ImportError, AttributeError):
+            pass
+    return backend
 GITHUB_ISSUE_MAC = "<https://github.com/labelle-org/labelle/issues/5>"
 GITHUB_ISSUE_UDEV = "<https://github.com/labelle-org/labelle/issues/6>"
 
@@ -97,7 +115,9 @@ class UsbDevice:
         return {
             UsbDevice(dev)
             for dev in usb.core.find(
-                find_all=True, custom_match=UsbDevice._is_supported_vendor
+                find_all=True,
+                custom_match=UsbDevice._is_supported_vendor,
+                backend=_get_libusb_backend(),
             )
         }
 

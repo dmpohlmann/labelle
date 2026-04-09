@@ -30,6 +30,7 @@ from labelle.lib.font_config import get_available_fonts
 from labelle.lib.render_engines import (
     BarcodeRenderEngine,
     BarcodeWithTextRenderEngine,
+    DataMatrixRenderEngine,
     EmptyRenderEngine,
     NoContentError,
     PicturePathDoesNotExist,
@@ -270,6 +271,31 @@ class QrDymoLabelWidget(BaseLabelWidget):
         """
         try:
             return QrRenderEngine(content=self.label.text())
+        except NoContentError:
+            return EmptyRenderEngine()
+
+
+class DataMatrixDymoLabelWidget(BaseLabelWidget):
+    """A widget for rendering DataMatrix codes on Dymo labels."""
+
+    def __init__(self, render_context, parent=None):
+        super().__init__(parent)
+        self.render_context = render_context
+
+        self.label = QLineEdit("")
+        layout = QHBoxLayout()
+        item_icon = QLabel()
+        item_icon.setPixmap(QIcon(str(ICON_DIR / "qr_icon.png")).pixmap(32, 32))
+        item_icon.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(item_icon)
+        layout.addWidget(self.label)
+        self.label.textChanged.connect(self.content_changed)
+        self.setLayout(layout)
+
+    @property
+    def render_engine_impl(self):
+        try:
+            return DataMatrixRenderEngine(content=self.label.text())
         except NoContentError:
             return EmptyRenderEngine()
 

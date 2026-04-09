@@ -29,6 +29,16 @@ except ImportError as error:  # pragma: no cover
     USE_QR = False
     QRCode = None
 
+try:
+    from ppf.datamatrix import DataMatrix
+
+    USE_DATAMATRIX = True
+    e_datamatrix = None
+except ImportError as error:  # pragma: no cover
+    e_datamatrix = error
+    USE_DATAMATRIX = False
+    DataMatrix = None
+
 
 UNCONFIRMED_MESSAGE = (
     "WARNING: This device is not confirmed to work with this software. Please "
