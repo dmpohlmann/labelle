@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QSpinBox,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -38,6 +39,7 @@ from labelle.lib.render_engines import (
     RenderContext,
     RenderEngine,
     TextRenderEngine,
+    VerticallyCombinedRenderEngine,
 )
 from labelle.lib.render_engines.render_engine import RenderEngineException
 
@@ -223,6 +225,104 @@ class TextDymoLabelWidget(BaseLabelWidget):
             font_size_ratio=self.font_size.value() / 100.0,
             align=selected_alignment,
         )
+
+
+class _TextRowWidget(QWidget):
+    """A single row within a VerticalTextGroupWidget."""
+
+    contentChanged = QtCore.pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.label = QLineEdit("text")
+        self.font_style = FontStyle()
+        self.font_size = QSpinBox()
+        self.font_size.setMaximum(150)
+        self.font_size.setMinimum(0)
+        self.font_size.setSingleStep(1)
+        self.font_size.setValue(90)
+        self.align = QComboBox()
+        self.align.addItems(["left", "center", "right"])
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.label)
+        layout.addWidget(QLabel("Font:"))
+        layout.addWidget(self.font_style)
+        layout.addWidget(QLabel("Size:"))
+        layout.addWidget(self.font_size)
+        layout.addWidget(QLabel("Align:"))
+        layout.addWidget(self.align)
+        self.setLayout(layout)
+
+        self.label.textChanged.connect(self.contentChanged)
+        self.font_style.currentTextChanged.connect(self.contentChanged)
+        self.font_size.valueChanged.connect(self.contentChanged)
+        self.align.currentTextChanged.connect(self.contentChanged)
+
+
+class VerticalTextGroupWidget(BaseLabelWidget):
+    """A widget containing multiple text rows stacked vertically, each independently formatted."""
+
+    def __init__(self, render_context, parent=None):
+        super().__init__(parent)
+        self.render_context = render_context
+        self._rows: list[_TextRowWidget] = []
+
+        self._outer_layout = QHBoxLayout()
+        item_icon = QLabel()
+        item_icon.setPixmap(QIcon(str(ICON_DIR / "txt_icon.png")).pixmap(32, 32))
+        item_icon.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignHCenter | QtCore.Qt.AlignmentFlag.AlignTop
+        )
+        self._outer_layout.addWidget(item_icon)
+
+        self._rows_layout = QVBoxLayout()
+        self._outer_layout.addLayout(self._rows_layout, stretch=1)
+
+        add_row_btn = QPushButton("+")
+        add_row_btn.setFixedWidth(30)
+        add_row_btn.clicked.connect(self._add_row)
+        self._outer_layout.addWidget(
+            add_row_btn, alignment=QtCore.Qt.AlignmentFlag.AlignBottom
+        )
+
+        self.setLayout(self._outer_layout)
+
+        # Start with 2 rows
+        self._add_row()
+        self._add_row()
+
+    def _add_row(self):
+        row = _TextRowWidget()
+        row.contentChanged.connect(self.content_changed)
+        self._rows.append(row)
+        self._rows_layout.addWidget(row)
+        self._update_height()
+        self.content_changed()
+
+    def _update_height(self):
+        row_height = 40
+        self.setFixedHeight(row_height * len(self._rows) + 10)
+
+    @property
+    def render_engine_impl(self):
+        engines = []
+        for row in self._rows:
+            text = row.label.text()
+            if not text:
+                text = " "
+            engines.append(
+                TextRenderEngine(
+                    text_lines=[text],
+                    font_file_name=row.font_style.currentData(),
+                    font_size_ratio=row.font_size.value() / 100.0,
+                    align=Direction(row.align.currentText()),
+                )
+            )
+        if not engines:
+            return EmptyRenderEngine()
+        return VerticallyCombinedRenderEngine(render_engines=engines)
 
 
 class QrDymoLabelWidget(BaseLabelWidget):

@@ -14,6 +14,7 @@ from labelle.gui.q_label_widgets import (
     ImageDymoLabelWidget,
     QrDymoLabelWidget,
     TextDymoLabelWidget,
+    VerticalTextGroupWidget,
 )
 from labelle.lib.constants import Direction
 from labelle.lib.devices.dymo_labeler import DymoLabeler
@@ -207,6 +208,7 @@ class QLabelList(QListWidget):
         assert self.render_context is not None
         contextMenu = QMenu(self)
         add_text: Optional[QAction] = contextMenu.addAction("Add Text")
+        add_text_group: Optional[QAction] = contextMenu.addAction("Add Text Group")
         add_qr: Optional[QAction] = contextMenu.addAction("Add QR")
         add_barcode: Optional[QAction] = contextMenu.addAction("Add Barcode")
         add_img: Optional[QAction] = contextMenu.addAction("Add Image")
@@ -220,6 +222,14 @@ class QLabelList(QListWidget):
             self.addItem(item)
             self.setItemWidget(item, text_item_widget)
             text_item_widget.itemRenderSignal.connect(self.render_label)
+
+        if menu_click == add_text_group:
+            item = QListWidgetItem(self)
+            group_widget = VerticalTextGroupWidget(self.render_context)
+            item.setSizeHint(group_widget.sizeHint())
+            self.addItem(item)
+            self.setItemWidget(item, group_widget)
+            group_widget.itemRenderSignal.connect(self.render_label)
 
         if menu_click == add_qr:
             item = QListWidgetItem(self)
