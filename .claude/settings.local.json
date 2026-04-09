@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo:*)",
+      "Bash(git remote:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(pip --version)",
+      "Bash(pip install:*)",
+      "Bash(labelle-gui)",
+      "Bash(echo \"GUI launched with PID $!\")",
+      "Bash(find:*)",
+      "Bash(python:*)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -r \"BarcodeType\\\\|barcode_type\" /d/repositories/labelle-win/src/labelle/gui/*.py)",
+      "Bash(ls -la /d/repositories/labelle-win/src/labelle/lib/render_engines/*.py)",
+      "Bash(grep:*)"
+    ]
+  }
+}
