@@ -61,15 +61,30 @@ class FontStyle(QComboBox):
         self.setModel(fonts_model)
 
         # Select default font
-        self.setCurrentText("Carlito-Regular")
+        self.setCurrentText("Carlito")
+
+    @staticmethod
+    def _get_font_display_name(font_path: Path) -> str:
+        """Get a human-readable display name for a font file."""
+        try:
+            from PIL import ImageFont
+
+            pil_font = ImageFont.truetype(str(font_path), 12)
+            family, style = pil_font.getname()
+            if style and style.lower() != "regular":
+                return f"{family} {style}"
+            return family
+        except Exception:
+            return font_path.stem
 
     def make_combobox_item_for_font(self, font_path: Path) -> QStandardItem:
         # Retrieve font data
         font_name = font_path.stem
         font_absolute_path = font_path.absolute()
+        display_name = self._get_font_display_name(font_path)
 
         # Make combobox item
-        item = QStandardItem(font_name)
+        item = QStandardItem(display_name)
         item.setData(font_absolute_path, QtCore.Qt.ItemDataRole.UserRole)
         item_font = QFont()
 
@@ -81,11 +96,11 @@ class FontStyle(QComboBox):
                 item_font.setFamilies(loaded_font_families)
 
         # Set bold if font name indictates it
-        if "bold" in font_name.lower():
+        if "bold" in display_name.lower():
             item_font.setBold(True)
 
         # Set italic if font name indictates it
-        if "italic" in font_name.lower():
+        if "italic" in display_name.lower():
             item_font.setItalic(True)
 
         # font to item
