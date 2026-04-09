@@ -22,6 +22,9 @@ from labelle.lib.render_engines.render_context import RenderContext
 from labelle.lib.render_engines.render_engine import RenderEngine
 from labelle.lib.render_engines.sample_pattern import SamplePatternRenderEngine
 from labelle.lib.render_engines.text import TextRenderEngine
+from labelle.lib.render_engines.vertically_combined import (
+    VerticallyCombinedRenderEngine,
+)
 
 __all__ = [
     "BarcodeRenderEngine",
@@ -44,4 +47,5 @@ __all__ = [
     "SamplePatternRenderEngine",
     "TextRenderEngine",
     "UnidentifiedImageFileError",
+    "VerticallyCombinedRenderEngine",
 ]
