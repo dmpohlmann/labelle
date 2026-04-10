@@ -615,9 +615,10 @@ class ImageDymoLabelWidget(BaseLabelWidget):
 
         button = QPushButton("Select file")
         file_dialog = QFileDialog()
+        file_filter = "Images (*.png *.jpg *.jpeg *.bmp *.gif *.tiff *.svg);;All Files (*)"
         button.clicked.connect(
             lambda: self.label.setText(
-                str(Path(file_dialog.getOpenFileName()[0]).absolute())
+                str(Path(file_dialog.getOpenFileName(filter=file_filter)[0]).absolute())
             )
         )
 
